@@ -1,13 +1,9 @@
-import path from 'node:path';
 import { browserName, detectOS } from 'detect-browser';
 import ipaddr from 'ipaddr.js';
 import isLocalhost from 'is-localhost-ip';
-import maxmind from 'maxmind';
 import { UAParser } from 'ua-parser-js';
 import { getIpAddress, stripPort } from '@/lib/ip';
 import { safeDecodeURIComponent } from '@/lib/url';
-
-const MAXMIND = 'maxmind';
 
 const PROVIDER_HEADERS = [
   // Cloudflare headers
@@ -83,28 +79,7 @@ export async function getLocation(ip: string = '', headers: Headers, hasPayloadI
     }
   }
 
-  // Database lookup
-  if (!globalThis[MAXMIND]) {
-    const dir = path.join(process.cwd(), 'geo');
-
-    globalThis[MAXMIND] = await maxmind.open(
-      process.env.GEOLITE_DB_PATH || path.resolve(dir, 'GeoLite2-City.mmdb'),
-    );
-  }
-
-  const result = globalThis[MAXMIND]?.get(stripPort(ip));
-
-  if (result) {
-    const country = result.country?.iso_code ?? result?.registered_country?.iso_code;
-    const region = result.subdivisions?.[0]?.iso_code;
-    const city = result.city?.names?.en;
-
-    return {
-      country,
-      region: getRegionCode(country, region),
-      city,
-    };
-  }
+  return null;
 }
 
 export async function getClientInfo(request: Request, payload: Record<string, any>) {

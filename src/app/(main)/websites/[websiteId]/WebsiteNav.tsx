@@ -22,7 +22,7 @@ export function WebsiteNav({
   onItemClick?: () => void;
 }) {
   const { formatMessage, labels } = useMessages();
-  const { pathname, renderUrl, teamId, router } = useNavigation();
+  const { pathname, renderUrl, router } = useNavigation();
 
   const renderPath = (path: string) =>
     renderUrl(`/websites/${websiteId}${path}`, {
@@ -164,7 +164,6 @@ export function WebsiteNav({
     <Column padding="3" position="sticky" top="0" gap>
       <WebsiteSelect
         websiteId={websiteId}
-        teamId={teamId}
         onChange={handleChange}
         renderValue={renderValue}
         buttonProps={{ style: { outline: 'none' } }}

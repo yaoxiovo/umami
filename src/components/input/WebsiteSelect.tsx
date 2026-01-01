@@ -10,24 +10,17 @@ import {
 
 export function WebsiteSelect({
   websiteId,
-  teamId,
   onChange,
-  includeTeams,
   ...props
 }: {
   websiteId?: string;
-  teamId?: string;
-  includeTeams?: boolean;
 } & SelectProps) {
   const { formatMessage, messages } = useMessages();
   const { data: website } = useWebsiteQuery(websiteId);
   const [name, setName] = useState<string>(website?.name);
   const [search, setSearch] = useState('');
   const { user } = useLoginQuery();
-  const { data, isLoading } = useUserWebsitesQuery(
-    { userId: user?.id, teamId },
-    { search, pageSize: 10, includeTeams },
-  );
+  const { data, isLoading } = useUserWebsitesQuery({ userId: user?.id }, { search, pageSize: 10 });
   const listItems: { id: string; name: string }[] = data?.data || [];
 
   const handleSearch = (value: string) => {

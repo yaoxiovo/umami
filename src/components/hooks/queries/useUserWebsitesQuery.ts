@@ -4,7 +4,7 @@ import { useModified } from '../useModified';
 import { usePagedQuery } from '../usePagedQuery';
 
 export function useUserWebsitesQuery(
-  { userId, teamId }: { userId?: string; teamId?: string },
+  { userId }: { userId?: string },
   params?: Record<string, any>,
   options?: ReactQueryOptions,
 ) {
@@ -12,19 +12,12 @@ export function useUserWebsitesQuery(
   const { modified } = useModified(`websites`);
 
   return usePagedQuery({
-    queryKey: ['websites', { userId, teamId, modified, ...params }],
+    queryKey: ['websites', { userId, modified, ...params }],
     queryFn: pageParams => {
-      return get(
-        teamId
-          ? `/teams/${teamId}/websites`
-          : userId
-            ? `/users/${userId}/websites`
-            : '/me/websites',
-        {
-          ...pageParams,
-          ...params,
-        },
-      );
+      return get(userId ? `/users/${userId}/websites` : '/me/websites', {
+        ...pageParams,
+        ...params,
+      });
     },
     ...options,
   });

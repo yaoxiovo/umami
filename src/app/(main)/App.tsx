@@ -5,22 +5,12 @@ import { useEffect } from 'react';
 import { MobileNav } from '@/app/(main)/MobileNav';
 import { SideNav } from '@/app/(main)/SideNav';
 import { useConfig, useLoginQuery, useNavigation } from '@/components/hooks';
-import { LAST_TEAM_CONFIG } from '@/lib/constants';
-import { removeItem, setItem } from '@/lib/storage';
 import { UpdateNotice } from './UpdateNotice';
 
 export function App({ children }) {
   const { user, isLoading, error } = useLoginQuery();
   const config = useConfig();
-  const { pathname, teamId } = useNavigation();
-
-  useEffect(() => {
-    if (teamId) {
-      setItem(LAST_TEAM_CONFIG, teamId);
-    } else {
-      removeItem(LAST_TEAM_CONFIG);
-    }
-  }, [teamId]);
+  const { pathname } = useNavigation();
 
   if (isLoading || !config) {
     return <Loading placement="absolute" />;

@@ -26,18 +26,6 @@ export function AdminWebsitesTable({ data = [] }: { data: any[] }) {
         </DataColumn>
         <DataColumn id="owner" label={formatMessage(labels.owner)}>
           {(row: any) => {
-            if (row?.team) {
-              return (
-                <Row alignItems="center" gap>
-                  <Icon>
-                    <Users />
-                  </Icon>
-                  <Text truncate>
-                    <Link href={`/admin/teams/${row?.team?.id}`}>{row?.team?.name}</Link>
-                  </Text>
-                </Row>
-              );
-            }
             return (
               <Text truncate>
                 <Link href={`/admin/users/${row?.user?.id}`}>{row?.user?.username}</Link>

@@ -20,7 +20,7 @@ declare namespace Cypress {
     login(username: string, password: string): Chainable<JQuery<HTMLElement>>;
     /**
      * Custom command to create a website
-     * @example cy.addWebsite('test', 'test.com')
+     * @example cy.addWebsite('cypressWebsite', 'cypress.io')
      */
     addWebsite(name: string, domain: string): Chainable<JQuery<HTMLElement>>;
     /**
@@ -28,10 +28,6 @@ declare namespace Cypress {
      * @example cy.deleteWebsite('02d89813-7a72-41e1-87f0-8d668f85008b')
      */
     deleteWebsite(websiteId: string): Chainable<JQuery<HTMLElement>>;
-    /**
-     * Custom command to create a website
-     * @example cy.deleteWebsite('02d89813-7a72-41e1-87f0-8d668f85008b')
-     */
     /**
      * Custom command to create a user
      * @example cy.addUser('cypress', 'password', 'User')
@@ -42,15 +38,5 @@ declare namespace Cypress {
      * @example cy.deleteUser('02d89813-7a72-41e1-87f0-8d668f85008b')
      */
     deleteUser(userId: string): Chainable<JQuery<HTMLElement>>;
-    /**
-     * Custom command to create a team
-     * @example cy.addTeam('cypressTeam')
-     */
-    addTeam(name: string): Chainable<JQuery<HTMLElement>>;
-    /**
-     * Custom command to create a website
-     * @example cy.deleteTeam('02d89813-7a72-41e1-87f0-8d668f85008b')
-     */
-    deleteTeam(teamId: string): Chainable<JQuery<HTMLElement>>;
   }
 }

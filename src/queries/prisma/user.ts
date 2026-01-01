@@ -113,19 +113,6 @@ export async function deleteUser(userId: string) {
     websiteIds = websites.map(a => a.id);
   }
 
-  const teams = await client.team.findMany({
-    where: {
-      members: {
-        some: {
-          userId,
-          role: ROLES.teamOwner,
-        },
-      },
-    },
-  });
-
-  const teamIds = teams.map(a => a.id);
-
   if (cloudMode) {
     return transaction([
       client.website.updateMany({
@@ -158,27 +145,6 @@ export async function deleteUser(userId: string) {
     }),
     client.session.deleteMany({
       where: { websiteId: { in: websiteIds } },
-    }),
-    client.teamUser.deleteMany({
-      where: {
-        OR: [
-          {
-            teamId: {
-              in: teamIds,
-            },
-          },
-          {
-            userId,
-          },
-        ],
-      },
-    }),
-    client.team.deleteMany({
-      where: {
-        id: {
-          in: teamIds,
-        },
-      },
     }),
     client.report.deleteMany({
       where: {

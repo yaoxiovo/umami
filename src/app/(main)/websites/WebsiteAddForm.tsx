@@ -2,17 +2,9 @@ import { Button, Form, FormField, FormSubmitButton, Row, TextField } from '@umam
 import { useMessages, useUpdateQuery } from '@/components/hooks';
 import { DOMAIN_REGEX } from '@/lib/constants';
 
-export function WebsiteAddForm({
-  teamId,
-  onSave,
-  onClose,
-}: {
-  teamId?: string;
-  onSave?: () => void;
-  onClose?: () => void;
-}) {
+export function WebsiteAddForm({ onSave, onClose }: { onSave?: () => void; onClose?: () => void }) {
   const { formatMessage, labels, messages } = useMessages();
-  const { mutateAsync, error, isPending } = useUpdateQuery('/websites', { teamId });
+  const { mutateAsync, error, isPending } = useUpdateQuery('/websites');
 
   const handleSubmit = async (data: any) => {
     await mutateAsync(data, {

@@ -4,7 +4,7 @@ import { Plus } from '@/components/icons';
 import { DialogButton } from '@/components/input/DialogButton';
 import { WebsiteAddForm } from './WebsiteAddForm';
 
-export function WebsiteAddButton({ teamId, onSave }: { teamId: string; onSave?: () => void }) {
+export function WebsiteAddButton({ onSave }: { onSave?: () => void }) {
   const { formatMessage, labels, messages } = useMessages();
   const { toast } = useToast();
   const { touch } = useModified();
@@ -22,7 +22,7 @@ export function WebsiteAddButton({ teamId, onSave }: { teamId: string; onSave?: 
       variant="primary"
       width="400px"
     >
-      {({ close }) => <WebsiteAddForm teamId={teamId} onSave={handleSave} onClose={close} />}
+      {({ close }) => <WebsiteAddForm onSave={handleSave} onClose={close} />}
     </DialogButton>
   );
 }

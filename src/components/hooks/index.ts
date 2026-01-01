@@ -1,9 +1,6 @@
 'use client';
 
 // Context hooks
-export * from './context/useLink';
-export * from './context/usePixel';
-export * from './context/useTeam';
 export * from './context/useUser';
 export * from './context/useWebsite';
 
@@ -15,11 +12,7 @@ export * from './queries/useEventDataEventsQuery';
 export * from './queries/useEventDataPropertiesQuery';
 export * from './queries/useEventDataQuery';
 export * from './queries/useEventDataValuesQuery';
-export * from './queries/useLinkQuery';
-export * from './queries/useLinksQuery';
 export * from './queries/useLoginQuery';
-export * from './queries/usePixelQuery';
-export * from './queries/usePixelsQuery';
 export * from './queries/useRealtimeQuery';
 export * from './queries/useReportQuery';
 export * from './queries/useReportsQuery';
@@ -29,14 +22,9 @@ export * from './queries/useSessionDataPropertiesQuery';
 export * from './queries/useSessionDataQuery';
 export * from './queries/useSessionDataValuesQuery';
 export * from './queries/useShareTokenQuery';
-export * from './queries/useTeamMembersQuery';
-export * from './queries/useTeamQuery';
-export * from './queries/useTeamsQuery';
-export * from './queries/useTeamWebsitesQuery';
 export * from './queries/useUpdateQuery';
 export * from './queries/useUserQuery';
 export * from './queries/useUsersQuery';
-export * from './queries/useUserTeamsQuery';
 export * from './queries/useUserWebsitesQuery';
 export * from './queries/useWebsiteCohortQuery';
 export * from './queries/useWebsiteCohortsQuery';
@@ -79,6 +67,5 @@ export * from './useNavigation';
 export * from './usePagedQuery';
 export * from './usePageParameters';
 export * from './useRegionNames';
-export * from './useSlug';
 export * from './useSticky';
 export * from './useTimezone';

@@ -23,9 +23,6 @@ model User {
 
   websites  Website[]  @relation("user")
   createdBy Website[]  @relation("createUser")
-  links     Link[]     @relation("user")
-  pixels    Pixel[]    @relation("user")
-  teams     TeamUser[]
   reports   Report[]
 
   @@map("user")
@@ -70,7 +67,6 @@ model Website {
   shareId   String?   @unique @map("share_id") @db.VarChar(50)
   resetAt   DateTime? @map("reset_at") @db.Timestamptz(6)
   userId    String?   @map("user_id") @db.Uuid
-  teamId    String?   @map("team_id") @db.Uuid
   createdBy String?   @map("created_by") @db.Uuid
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -78,7 +74,6 @@ model Website {
 
   user        User?         @relation("user", fields: [userId], references: [id])
   createUser  User?         @relation("createUser", fields: [createdBy], references: [id])
-  team        Team?         @relation(fields: [teamId], references: [id])
   eventData   EventData[]
   reports     Report[]
   revenue     Revenue[]
@@ -86,7 +81,6 @@ model Website {
   sessionData SessionData[]
 
   @@index([userId])
-  @@index([teamId])
   @@index([createdAt])
   @@index([shareId])
   @@index([createdBy])
@@ -186,40 +180,6 @@ model SessionData {
   @@map("session_data")
 }
 
-model Team {
-  id         String    @id() @unique() @map("team_id") @db.Uuid
-  name       String    @db.VarChar(50)
-  accessCode String?   @unique @map("access_code") @db.VarChar(50)
-  logoUrl    String?   @map("logo_url") @db.VarChar(2183)
-  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  websites Website[]
-  members  TeamUser[]
-  links    Link[]
-  pixels   Pixel[]
-
-  @@index([accessCode])
-  @@map("team")
-}
-
-model TeamUser {
-  id        String    @id() @unique() @map("team_user_id") @db.Uuid
-  teamId    String    @map("team_id") @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  role      String    @db.VarChar(50)
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  team Team @relation(fields: [teamId], references: [id])
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([teamId])
-  @@index([userId])
-  @@map("team_user")
-}
-
 model Report {
   id          String    @id() @unique() @map("report_id") @db.Uuid
   userId      String    @map("user_id") @db.Uuid
@@ -274,45 +234,4 @@ model Revenue {
   @@index([websiteId, createdAt])
   @@index([websiteId, sessionId, createdAt])
   @@map("revenue")
-}
-
-model Link {
-  id        String    @id() @unique() @map("link_id") @db.Uuid
-  name      String    @db.VarChar(100)
-  url       String    @db.VarChar(500)
-  slug      String    @unique() @db.VarChar(100)
-  userId    String?   @map("user_id") @db.Uuid
-  teamId    String?   @map("team_id") @db.Uuid
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  user User? @relation("user", fields: [userId], references: [id])
-  team Team? @relation(fields: [teamId], references: [id])
-
-  @@index([slug])
-  @@index([userId])
-  @@index([teamId])
-  @@index([createdAt])
-  @@map("link")
-}
-
-model Pixel {
-  id        String    @id() @unique() @map("pixel_id") @db.Uuid
-  name      String    @db.VarChar(100)
-  slug      String    @unique() @db.VarChar(100)
-  userId    String?   @map("user_id") @db.Uuid
-  teamId    String?   @map("team_id") @db.Uuid
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  user User? @relation("user", fields: [userId], references: [id])
-  team Team? @relation(fields: [teamId], references: [id])
-
-  @@index([slug])
-  @@index([userId])
-  @@index([teamId])
-  @@index([createdAt])
-  @@map("pixel")
 }

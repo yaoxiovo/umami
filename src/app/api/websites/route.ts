@@ -4,9 +4,9 @@ import redis from '@/lib/redis';
 import { getQueryFilters, parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams } from '@/lib/schema';
-import { canCreateTeamWebsite, canCreateWebsite } from '@/permissions';
+import { canCreateWebsite } from '@/permissions';
 import { createWebsite, getWebsiteCount } from '@/queries/prisma';
-import { getAllUserWebsitesIncludingTeamOwner, getUserWebsites } from '@/queries/prisma/website';
+import { getUserWebsites } from '@/queries/prisma/website';
 
 const CLOUD_WEBSITE_LIMIT = 3;
 
@@ -14,7 +14,6 @@ export async function GET(request: Request) {
   const schema = z.object({
     ...pagingParams,
     ...searchParams,
-    includeTeams: z.string().optional(),
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
@@ -27,10 +26,6 @@ export async function GET(request: Request) {
 
   const filters = await getQueryFilters(query);
 
-  if (query.includeTeams) {
-    return json(await getAllUserWebsitesIncludingTeamOwner(userId, filters));
-  }
-
   return json(await getUserWebsites(userId, filters));
 }
 
@@ -39,7 +34,6 @@ export async function POST(request: Request) {
     name: z.string().max(100),
     domain: z.string().max(500),
     shareId: z.string().max(50).nullable().optional(),
-    teamId: z.uuid().nullable().optional(),
     id: z.uuid().nullable().optional(),
   });
 
@@ -49,9 +43,9 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const { id, name, domain, shareId, teamId } = body;
+  const { id, name, domain, shareId } = body;
 
-  if (process.env.CLOUD_MODE && !teamId) {
+  if (process.env.CLOUD_MODE) {
     const account = await redis.client.get(`account:${auth.user.id}`);
 
     if (!account?.hasSubscription) {
@@ -63,7 +57,7 @@ export async function POST(request: Request) {
     }
   }
 
-  if ((teamId && !(await canCreateTeamWebsite(auth, teamId))) || !(await canCreateWebsite(auth))) {
+  if (!(await canCreateWebsite(auth))) {
     return unauthorized();
   }
 
@@ -73,12 +67,8 @@ export async function POST(request: Request) {
     name,
     domain,
     shareId,
-    teamId,
+    userId: auth.user.id,
   };
-
-  if (!teamId) {
-    data.userId = auth.user.id;
-  }
 
   const website = await createWebsite(data);
 

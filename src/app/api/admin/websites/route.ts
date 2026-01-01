@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { ROLES } from '@/lib/constants';
 import { parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams } from '@/lib/schema';
@@ -32,18 +31,6 @@ export async function GET(request: Request) {
           select: {
             username: true,
             id: true,
-          },
-        },
-        team: {
-          where: {
-            deletedAt: null,
-          },
-          include: {
-            members: {
-              where: {
-                role: ROLES.teamOwner,
-              },
-            },
           },
         },
       },
