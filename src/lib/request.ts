@@ -45,8 +45,128 @@ export async function parseRequest(
 
 export async function getJsonBody(request: Request) {
   try {
-    return await request.clone().json();
-  } catch {
+    const headers = Object.fromEntries(request.headers);
+
+    // Log headers to debug environment issues
+    console.log('[RequestDebug] Headers:', JSON.stringify(headers));
+    console.log('[RequestDebug] Method:', request.method, 'URL:', request.url);
+
+    // Try to clone first
+    let req = request;
+    try {
+      req = request.clone();
+    } catch (e) {
+      console.warn('[RequestDebug] Clone failed, using original request', e);
+    }
+
+    let text;
+    try {
+      text = await req.text();
+    } catch (textError) {
+      console.warn(
+        '[RequestDebug] Failed to read text from cloned request, trying original',
+        textError,
+      );
+      // Fallback: If clone failed to produce a readable stream (e.g. platform specific issue), try original
+      if (req !== request) {
+        try {
+          text = await request.text();
+        } catch (origError) {
+          console.error('[RequestDebug] Failed to read text from original request', origError);
+        }
+      }
+    }
+
+    // Fix for EdgeOne/Next.js adapter issue: If clone() succeeds but returns empty content, try reading original request
+    if (!text && req !== request) {
+      try {
+        console.log('[RequestDebug] Clone was empty, trying original request body...');
+        const originalText = await request.text();
+        // If original text is not empty, use it.
+        // Or if it IS empty but we suspect base64 issue, we might want to check buffer?
+        // But request.text() should handle buffer decoding usually.
+        // Let's assume if originalText has content, it's better than empty.
+        if (originalText) {
+          text = originalText;
+          console.log('[RequestDebug] Used original request body as clone was empty.');
+        }
+      } catch (e) {
+        console.error('[RequestDebug] Failed to read text from original request fallback', e);
+      }
+    }
+
+    // EDGE CASE: Even original request might return empty string if the platform already consumed the stream
+    // and didn't implement proper teeing. In some SCF environments, body might be in a different property
+    // attached to the request object by the adapter, but that's non-standard.
+    // However, sometimes req.json() works when req.text() fails due to internal buffering optimization.
+    if (!text && req === request) {
+      try {
+        // Last ditch effort: try .json() directly on the request if text() returned empty
+        // This is rare but possible if text() stream was consumed but json() parser has a separate buffer reference
+        const json = await request.json();
+        if (json) {
+          console.log('[RequestDebug] Recovered body via direct .json() call');
+          return json;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // ULTRA EDGE CASE for EdgeOne / SCF:
+    // If Content-Length > 0 but body is empty, it means the stream is drained.
+    // Some adapters attach the raw body buffer to a symbol or property.
+    // We can try to reconstruct it if possible, but standard Fetch API doesn't allow it.
+    // However, we can check if there's a specific SCF context attached to headers or global object.
+    // BUT, since we saw 'Body is unusable: Body has already been read' in POC, we know the stream is closed.
+    // The only way 'request.json()' failed in POC is because it also tries to read the stream.
+
+    console.log('[RequestDebug] Raw Body Text:', text ? text.substring(0, 1000) : '<empty>');
+
+    if (!text) {
+      return undefined;
+    }
+
+    // Handle Tencent Cloud SCF / EdgeOne base64 encoded body
+    if (
+      headers['x-scf-is-base64-encoded'] === 'true' ||
+      headers['x-scf-is-base64-encoded'] === 'TRUE'
+    ) {
+      try {
+        console.log('[RequestDebug] Detected Base64 encoded body, decoding...');
+        text = Buffer.from(text, 'base64').toString('utf-8');
+        console.log(
+          '[RequestDebug] Decoded Body Text:',
+          text ? text.substring(0, 1000) : '<empty>',
+        );
+      } catch (e) {
+        console.error('[RequestDebug] Failed to decode base64 body:', e);
+      }
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch (jsonErr) {
+      // Fallback: If JSON parse fails, try to decode base64 anyway (missing header case)
+      try {
+        const decoded = Buffer.from(text, 'base64').toString('utf-8');
+        // Simple check if it looks like JSON to avoid false positives on random strings
+        if (decoded.trim().startsWith('{') || decoded.trim().startsWith('[')) {
+          const json = JSON.parse(decoded);
+          console.log(
+            '[RequestDebug] JSON Parse failed but Base64 decode succeeded (missing header fallback).',
+          );
+          return json;
+        }
+      } catch (fallbackErr) {
+        // Ignore fallback error
+      }
+
+      console.error('[RequestDebug] JSON Parse Error:', jsonErr);
+      return undefined;
+    }
+  } catch (e) {
+    console.error('[RequestDebug] Body Read Error:', e);
     return undefined;
   }
 }

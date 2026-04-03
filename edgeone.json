@@ -1,0 +1,34 @@
+{
+  "redirects": [
+    {
+      "source": "/settings",
+      "destination": "/settings/preferences",
+      "statusCode": 302
+    },
+    {
+      "source": "/teams/:id",
+      "destination": "/teams/:id/websites",
+      "statusCode": 302
+    },
+    {
+      "source": "/teams/:id/settings",
+      "destination": "/teams/:id/settings/preferences",
+      "statusCode": 302
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/users",
+      "statusCode": 302
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/telemetry.js",
+      "destination": "/api/scripts/telemetry"
+    },
+    {
+      "source": "/teams/:teamId/:path(.*)",
+      "destination": "/:path"
+    }
+  ]
+}
