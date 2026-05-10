@@ -1,7 +1,9 @@
+import clickhouse from '@/lib/clickhouse';
 import { DATA_TYPE } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { flattenJSON, getStringValue } from '@/lib/data';
-import { PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import kafka from '@/lib/kafka';
 import prisma from '@/lib/prisma';
 import type { DynamicData } from '@/lib/types';
 
@@ -16,6 +18,7 @@ export interface SaveSessionDataArgs {
 export async function saveSessionData(data: SaveSessionDataArgs) {
   return runQuery({
     [PRISMA]: () => relationalQuery(data),
+    [CLICKHOUSE]: () => clickhouseQuery(data),
   });
 }
 
@@ -72,5 +75,38 @@ export async function relationalQuery({
         data,
       });
     }
+  }
+}
+
+async function clickhouseQuery({
+  websiteId,
+  sessionId,
+  sessionData,
+  distinctId,
+  createdAt,
+}: SaveSessionDataArgs) {
+  const { insert, getUTCString } = clickhouse;
+  const { sendMessage } = kafka;
+
+  const jsonKeys = flattenJSON(sessionData);
+
+  const messages = jsonKeys.map(({ key, value, dataType }) => {
+    return {
+      website_id: websiteId,
+      session_id: sessionId,
+      data_key: key,
+      data_type: dataType,
+      string_value: getStringValue(value, dataType),
+      number_value: dataType === DATA_TYPE.number ? value : null,
+      date_value: dataType === DATA_TYPE.date ? getUTCString(value) : null,
+      distinct_id: distinctId,
+      created_at: getUTCString(createdAt),
+    };
+  });
+
+  if (kafka.enabled) {
+    await sendMessage('session_data', messages);
+  } else {
+    await insert('session_data', messages);
   }
 }

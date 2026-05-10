@@ -27,6 +27,12 @@ export function SettingsNav({ onItemClick }: { onItemClick?: () => void }) {
           path: renderUrl('/settings/profile'),
           icon: <UserCircle />,
         },
+        {
+          id: 'teams',
+          label: formatMessage(labels.teams),
+          path: renderUrl('/settings/teams'),
+          icon: <Users />,
+        },
       ],
     },
   ];

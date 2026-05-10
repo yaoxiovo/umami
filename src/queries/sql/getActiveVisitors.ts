@@ -1,5 +1,6 @@
 import { subMinutes } from 'date-fns';
-import { PRISMA, runQuery } from '@/lib/db';
+import clickhouse from '@/lib/clickhouse';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 
 const FUNCTION_NAME = 'getActiveVisitors';
@@ -7,6 +8,7 @@ const FUNCTION_NAME = 'getActiveVisitors';
 export async function getActiveVisitors(...args: [websiteId: string]) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
+    [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
@@ -26,4 +28,23 @@ async function relationalQuery(websiteId: string) {
   );
 
   return result?.[0] ?? null;
+}
+
+async function clickhouseQuery(websiteId: string): Promise<{ x: number }> {
+  const { rawQuery } = clickhouse;
+  const startDate = subMinutes(new Date(), 5);
+
+  const result = await rawQuery(
+    `
+    select
+      count(distinct session_id) as "visitors"
+    from website_event
+    where website_id = {websiteId:UUID}
+      and created_at >= {startDate:DateTime64}
+    `,
+    { websiteId, startDate },
+    FUNCTION_NAME,
+  );
+
+  return result[0] ?? null;
 }

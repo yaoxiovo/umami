@@ -8,16 +8,17 @@ import { WebsiteAddButton } from './WebsiteAddButton';
 import { WebsitesDataTable } from './WebsitesDataTable';
 
 export function WebsitesPage() {
+  const { teamId } = useNavigation();
   const { formatMessage, labels } = useMessages();
 
   return (
     <PageBody>
       <Column gap="6" margin="2">
         <PageHeader title={formatMessage(labels.websites)}>
-          <WebsiteAddButton />
+          <WebsiteAddButton teamId={teamId} />
         </PageHeader>
         <Panel>
-          <WebsitesDataTable />
+          <WebsitesDataTable teamId={teamId} />
         </Panel>
       </Column>
     </PageBody>

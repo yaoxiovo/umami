@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 import type { Key } from 'react';
 import { useGlobalState, useMessages, useNavigation } from '@/components/hooks';
-import { Globe, PanelLeft } from '@/components/icons';
+import { Globe, Grid2x2, LinkIcon, PanelLeft } from '@/components/icons';
 import { LanguageButton } from '@/components/input/LanguageButton';
 import { NavButton } from '@/components/input/NavButton';
 import { PanelButton } from '@/components/input/PanelButton';
@@ -30,10 +30,22 @@ export function SideNav(props: SidebarProps) {
       path: '/websites',
       icon: <Globe />,
     },
+    {
+      id: 'links',
+      label: formatMessage(labels.links),
+      path: '/links',
+      icon: <LinkIcon />,
+    },
+    {
+      id: 'pixels',
+      label: formatMessage(labels.pixels),
+      path: '/pixels',
+      icon: <Grid2x2 />,
+    },
   ];
 
   const handleSelect = (id: Key) => {
-    router.push('/websites');
+    router.push(id === 'user' ? '/websites' : `/teams/${id}/websites`);
   };
 
   return (

@@ -22,6 +22,12 @@ export function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
           path: '/admin/websites',
           icon: <Globe />,
         },
+        {
+          id: 'teams',
+          label: formatMessage(labels.teams),
+          path: '/admin/teams',
+          icon: <Users />,
+        },
       ],
     },
   ];

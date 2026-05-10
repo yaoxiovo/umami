@@ -4,13 +4,13 @@ import { WebsitesDataTable } from '@/app/(main)/websites/WebsitesDataTable';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { useMessages } from '@/components/hooks';
 
-export function WebsitesSettingsPage() {
+export function WebsitesSettingsPage({ teamId }: { teamId: string }) {
   const { formatMessage, labels } = useMessages();
 
   return (
     <Column gap>
       <SectionHeader title={formatMessage(labels.websites)} />
-      <WebsitesDataTable />
+      <WebsitesDataTable teamId={teamId} />
     </Column>
   );
 }
